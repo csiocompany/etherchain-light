@@ -6,6 +6,49 @@ var Web3 = require('web3');
 var abi = require('ethereumjs-abi');
 var abiDecoder = require('abi-decoder');
 
+
+
+
+router.get('/list', function(req, res, next) {
+  res.render('empty', {});
+});
+
+router.post('/list', function(req, res, next) {
+    if (!req.body.accounts) {
+      return res.json({ result: 'error', message: 'No accounts data specified' });
+    }
+
+    var config = req.app.get('config');  
+    var web3 = new Web3();
+    web3.setProvider(config.provider);
+
+    var p_accounts = req.body.accounts;
+
+    web3.eth.getBlock("latest", false, function(err, result) {
+        var lastBlock = result.number;
+
+        var p_fromBlock = lastBlock - 500;
+
+        if (req.body.fromBlock) {
+          p_fromBlock = req.body.fromBlock;
+        }
+
+        web3.trace.filter({ "fromBlock": "0x" + p_fromBlock.toString(16), "fromAddress": p_accounts }, function(err, sent) {
+           web3.trace.filter({ "fromBlock": "0x" + p_fromBlock.toString(16), "toAddress": p_accounts }, function(err, received) {
+            res.json({
+              result: 'ok',
+              data: {
+                sent: sent,
+                received: received
+              }
+            });
+          });
+        });
+    });
+});
+
+
+
 router.get('/pending', function(req, res, next) {
   
   var config = req.app.get('config');  
