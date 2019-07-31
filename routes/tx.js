@@ -25,9 +25,9 @@ router.post('/list', function(req, res, next) {
     var p_accounts = req.body.accounts;
 
     web3.eth.getBlock("latest", false, function(err, result) {
-        var lastBlock = result.number;
+        var lastBlock = result;
 
-        var p_fromBlock = lastBlock - 500;
+        var p_fromBlock = result.number - 500;
 
         if (req.body.fromBlock) {
           p_fromBlock = req.body.fromBlock;
@@ -35,13 +35,52 @@ router.post('/list', function(req, res, next) {
 
         web3.trace.filter({ "fromBlock": "0x" + p_fromBlock.toString(16), "fromAddress": p_accounts }, function(err, sent) {
            web3.trace.filter({ "fromBlock": "0x" + p_fromBlock.toString(16), "toAddress": p_accounts }, function(err, received) {
-            res.json({
+
+          // Add Blocks
+            var blockNums = [];
+
+            sent.forEach(function(item) {
+              if (blockNums.indexOf(item['blockNumber']) == -1) {
+                blockNums.push(item['blockNumber']);
+              }
+            });
+            received.forEach(function(item) {
+              if (blockNums.indexOf(item['blockNumber']) == -1) {
+                blockNums.push(item['blockNumber']);
+              }
+            });
+
+            var size = blockNums.length,
+                count = 0,
+                arrBlocks = {};
+            blockNums.forEach(function(item) {
+              web3.eth.getBlock(item, false, function(err, result) {
+                arrBlocks[result.number] = result;
+
+                count++;
+
+                if (count == size) {
+                  res.json({
+                    result: 'ok',
+                    data: {
+                      latest: lastBlock,
+                      sent: sent,
+                      received: received,
+                      blocks: arrBlocks
+                    }
+                  });
+                }
+              });
+            });
+          // Add Blocks
+
+            /*res.json({
               result: 'ok',
               data: {
                 sent: sent,
                 received: received
               }
-            });
+            });*/
           });
         });
     });
