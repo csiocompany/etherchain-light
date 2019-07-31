@@ -24,6 +24,7 @@ router.post('/balance', function(req, res, next) {
   var p_accounts = req.body.accounts;
   var data = {};
   var size = p_accounts.length;
+  var balances = {};
 
 
   for (var i in p_accounts) {
