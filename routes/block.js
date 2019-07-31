@@ -4,6 +4,36 @@ var router = express.Router();
 var async = require('async');
 var Web3 = require('web3');
 
+
+router.get('/latest', function(req, res, next) {
+  var config = req.app.get('config');  
+  var web3 = new Web3();
+  web3.setProvider(config.provider);
+
+  var q_format = req.query.format;
+
+  async.waterfall([
+    function(callback) {
+      web3.eth.getBlock("latest", false, function(err, result) {
+        callback(err, result);
+      });
+    }
+  ], function(err, block) {
+    if (err) {
+      return next(err);
+    }
+    
+    if (q_format == "json") {
+      res.json({ block: block });
+    }
+    else {
+      res.render("empty", {});
+    }
+  });
+});
+
+
+
 router.get('/:block', function(req, res, next) {
   
   var config = req.app.get('config');  
