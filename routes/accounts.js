@@ -23,8 +23,24 @@ router.post('/balance', function(req, res, next) {
   
   var p_accounts = req.body.accounts;
   var data = {};
+  var size = p_accounts.length;
 
-  async.waterfall([
+
+  for (var i in p_accounts) {
+    web3.eth.getBalance(p_accounts[i], function(err, balance) {
+      balances[p_accounts[i]] = balance.toNumber();
+
+      if (i == size) {
+        res.json({
+          result: 'ok',
+          data: balances
+        });
+      }
+    });
+  }
+
+
+  /*async.waterfall([
     function(callback) {
       var balances = {};
 
@@ -38,7 +54,7 @@ router.post('/balance', function(req, res, next) {
     data.balances = balances;
     
     res.json(data);
-  });
+  });*/
 });
 
 
