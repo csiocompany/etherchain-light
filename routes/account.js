@@ -11,6 +11,12 @@ router.get('/:account', function(req, res, next) {
   web3.setProvider(config.provider);
   
   var db = req.app.get('db');
+
+
+  var q_format = req.query.format,
+      q_fromBlock = parseInt(req.query.fromBlock),
+      q_toBlock = req.query.toBlock;
+
   
   var data = {};
   
@@ -22,7 +28,10 @@ router.get('/:account', function(req, res, next) {
     }, function(lastBlock, callback) {
       data.lastBlock = lastBlock.number;
       //limits the from block to -1000 blocks ago if block count is greater than 1000
-      if (data.lastBlock > 0x3E8) {
+      if (q_fromBlock) {
+        data.fromBlock = q_fromBlock;
+      }
+      else if (data.lastBlock > 0x3E8) {
         data.fromBlock = data.lastBlock - 0x3e8;
       } else {
         data.fromBlock = 0x00;
@@ -132,7 +141,10 @@ router.get('/:account', function(req, res, next) {
     
     data.blocks = data.blocks.reverse().splice(0, 100);
     
-    res.render('account', { account: data });
+    if (q_format == 'json')
+      res.json({ account: data });
+    else 
+      res.render('account', { account: data });
   });
   
 });

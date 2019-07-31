@@ -11,6 +11,8 @@ router.get('/pending', function(req, res, next) {
   var config = req.app.get('config');  
   var web3 = new Web3();
   web3.setProvider(config.provider);
+
+  var q_format = req.query.format;
   
   async.waterfall([
     function(callback) {
@@ -23,7 +25,12 @@ router.get('/pending', function(req, res, next) {
       return next(err);
     }
     
-    res.render('tx_pending', { txs: txs });
+    if (q_format == 'json') {
+      res.json({ txs: txs });
+    }
+    else {
+      res.render('tx_pending', { txs: txs });
+    }
   });
 });
 
@@ -33,8 +40,15 @@ router.get('/submit', function(req, res, next) {
 });
 
 router.post('/submit', function(req, res, next) {
+  var p_format = req.body.format;
+
   if (!req.body.txHex) {
-    return res.render('tx_submit', { message: "No transaction data specified"});
+    if (p_format == 'json') {
+      return res.json({ result: 'error', message: "No transaction data specified" });
+    }
+    else {
+      return res.render('tx_submit', { message: "No transaction data specified"});
+    }
   }
   
   var config = req.app.get('config');  
@@ -49,9 +63,19 @@ router.post('/submit', function(req, res, next) {
     }
   ], function(err, hash) {
     if (err) {
-      res.render('tx_submit', { message: "Error submitting transaction: " + err });
+      if (p_format == 'json') {
+        res.json({ result: 'error', message: "Error submitting transaction: " + err });
+      }
+      else {
+        res.render('tx_submit', { message: "Error submitting transaction: " + err });
+      }
     } else {
-      res.render('tx_submit', { message: "Transaction submitted. Hash: " + hash });
+      if (p_format == 'json') {
+        res.json({ result: 'ok', hash: hash });
+      }
+      else {
+        res.render('tx_submit', { message: "Transaction submitted. Hash: " + hash });
+      }
     }
   });
 });
@@ -63,6 +87,8 @@ router.get('/:tx', function(req, res, next) {
   web3.setProvider(config.provider);
   
   var db = req.app.get('db');
+
+  var q_format = req.query.format;
   
   async.waterfall([
     function(callback) {
@@ -119,8 +145,14 @@ router.get('/:tx', function(req, res, next) {
         }
       });
     }
-    // console.log(tx.traces);    
-    res.render('tx', { tx: tx });
+    // console.log(tx.traces); 
+
+    if (q_format == 'json') {
+      res.json({ tx: tx });
+    }
+    else {
+      res.render('tx', { tx: tx });
+    }
   });
   
 });
@@ -130,6 +162,8 @@ router.get('/raw/:tx', function(req, res, next) {
   var config = req.app.get('config');  
   var web3 = new Web3();
   web3.setProvider(config.provider);
+
+  var q_format = req.query.format;
   
   async.waterfall([
     function(callback) {
@@ -148,7 +182,12 @@ router.get('/raw/:tx', function(req, res, next) {
     
     tx.traces = traces;
 
-    res.render('tx_raw', { tx: tx });
+    if (q_format == 'json') {
+      res.json({ tx: tx });
+    }
+    else {
+      res.render('tx_raw', { tx: tx });
+    }
   });
 });
 

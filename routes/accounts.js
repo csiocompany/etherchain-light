@@ -4,6 +4,48 @@ var router = express.Router();
 var async = require('async');
 var Web3 = require('web3');
 
+
+
+
+
+router.get('/balance', function(req, res, next) {
+  res.render('empty', {});
+});
+
+router.post('/balance', function(req, res, next) {
+  if (!req.body.accounts) {
+    return res.json({ result: 'error', message: "No accounts data specified" });
+  }
+
+  var config = req.app.get('config');  
+  var web3 = new Web3();
+  web3.setProvider(config.provider);
+  
+  var p_accounts = req.body.accounts;
+  var data = {};
+
+  async.waterfall([
+    function(callback) {
+      var balances = {};
+
+      for (var i in p_accounts) {
+        balances[p_accounts[i]] = web3.eth.getBalance(p_accounts[i]);
+      }
+
+      callback(balances);
+    }
+  ], function(balances) {
+    data.balances = balances;
+    
+    res.json(data);
+  });
+});
+
+
+
+
+
+
 router.get('/:offset?', function(req, res, next) {
   var config = req.app.get('config');  
   var web3 = new Web3();

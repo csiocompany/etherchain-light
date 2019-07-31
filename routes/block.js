@@ -9,6 +9,8 @@ router.get('/:block', function(req, res, next) {
   var config = req.app.get('config');  
   var web3 = new Web3();
   web3.setProvider(config.provider);
+
+  var q_format = req.query.format;
   
   async.waterfall([
     function(callback) {
@@ -44,7 +46,13 @@ router.get('/:block', function(req, res, next) {
       }
       // console.log(tx);
     });
-    res.render('block', { block: block });
+
+    if (q_format == 'json') {
+      res.json({ block: block });
+    }
+    else {
+      res.render('block', { block: block });
+    }
   });
   
 });
