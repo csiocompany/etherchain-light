@@ -23,24 +23,23 @@ router.post('/balance', function(req, res, next) {
   
   var p_accounts = req.body.accounts;
   var data = {};
-  var size = p_accounts.length - 1;
+  var size = p_accounts.length, count = 0;
   var balances = {};
 
+  p_accounts.forEach(function(item) {
+    web3.eth.getBalance(item, function(err, balance) {
+      balances[item] = balance.toString();
 
-  for (var i in p_accounts) {
-    var acc = p_accounts[i];
-    
-    web3.eth.getBalance(p_accounts[i], function(err, balance) {
-      balances[acc] = balance.toString();
+      count++;
 
-      if (i == size) {
+      if (count == size) {
         res.json({
           result: 'ok',
           data: balances
         });
       }
     });
-  }
+  });
 
 
   /*async.waterfall([
