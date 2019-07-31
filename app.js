@@ -34,7 +34,7 @@ app.set('trust proxy', true);
 app.use(logger(config.logFormat));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({
-  extended: false
+  extended: true
 }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
