@@ -28,8 +28,10 @@ router.post('/balance', function(req, res, next) {
 
 
   for (var i in p_accounts) {
+    var acc = p_accounts[i];
+    
     web3.eth.getBalance(p_accounts[i], function(err, balance) {
-      balances[p_accounts[i]] = balance.toString();
+      balances[acc] = balance.toString();
 
       if (i == size) {
         res.json({
