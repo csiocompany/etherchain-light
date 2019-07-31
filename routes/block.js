@@ -24,7 +24,7 @@ router.get('/latest', function(req, res, next) {
     }
     
     if (q_format == "json") {
-      res.json({ block: block });
+      res.json({ block });
     }
     else {
       res.render("empty", {});
